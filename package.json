@@ -1,0 +1,27 @@
+{
+  "dependencies": {
+    "express": "^5.1.0",
+    "mic": "^2.1.2"
+  },
+  "name": "projeto-ia",
+  "version": "1.0.0",
+  "description": "\"# Projeto IA\"",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NunesGPT/projeto-ia.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NunesGPT/projeto-ia/issues"
+  },
+  "homepage": "https://github.com/NunesGPT/projeto-ia#readme"
+}

@@ -1,3 +1,5 @@
+const pesquisarWeb = require('./gatilhos/pesquisarWeb');
+const gravarAudioStream = require('./gatilhos/gravarAudioStream');
 const gravarVideo = require('./gatilhos/gravarVideo');
 const executarShell = require('./gatilhos/executarShell');
 const falar = require('./gatilhos/falar');
@@ -58,4 +60,22 @@ app.post('/executar', (req, res) => {
 
 app.listen(port, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${port}`);
+  gravarAudioStream(); // 🔊 Inicia captação contínua ao iniciar o sistema
+});
+
+// Rota para pesquisar na web
+app.post('/pesquisar', async (req, res) => {
+  const { consulta } = req.body;
+
+  if (!consulta) {
+    return res.status(400).send('❌ Consulta ausente.');
+  }
+
+  const resultados = await pesquisarWeb(consulta);
+
+  if (!resultados) {
+    return res.status(500).send('❌ Erro ao pesquisar.');
+  }
+
+  res.json(resultados);
 });

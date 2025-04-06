@@ -1,3 +1,4 @@
+const gravarVideo = require('./gatilhos/gravarVideo');
 const executarShell = require('./gatilhos/executarShell');
 const falar = require('./gatilhos/falar');
 const express = require('express');
@@ -33,6 +34,7 @@ app.post('/sensor', (req, res) => {
   // ✅ Gatilho modular de notificação (executado no Termux)
   notificar(tipo, valor);
   falar(`Sensor ${tipo} recebeu o valor ${valor}`);
+  gravarVideo(15); // grava 15 segundos
 
   res.send(`Leitura de ${tipo} registrada com sucesso.`);
 });

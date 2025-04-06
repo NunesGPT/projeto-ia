@@ -5,6 +5,8 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
+const notificar = require('./gatilhos/notificar'); // ✅ Importa o gatilho
+
 // Memória simples para armazenar os dados recebidos
 let dadosSensores = [];
 
@@ -26,9 +28,8 @@ app.post('/sensor', (req, res) => {
 
   console.log(`✅ Sensor ${tipo} recebeu o valor ${valor} às ${leitura.horario}`);
 
-  // Enviar notificação no Termux (no G22)
-  const { exec } = require('child_process');
-  exec(`termux-notification --title "Comando recebido" --content "Sensor: ${tipo} | Valor: ${valor}"`);
+  // ✅ Gatilho modular de notificação (executado no Termux)
+  notificar(tipo, valor);
 
   res.send(`Leitura de ${tipo} registrada com sucesso.`);
 });

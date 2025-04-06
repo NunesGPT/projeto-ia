@@ -1,3 +1,4 @@
+const executarShell = require('./gatilhos/executarShell');
 const falar = require('./gatilhos/falar');
 const express = require('express');
 const app = express();
@@ -39,6 +40,18 @@ app.post('/sensor', (req, res) => {
 // Rota para visualizar os dados armazenados
 app.get('/sensores', (req, res) => {
   res.json(dadosSensores);
+});
+
+// Rota para executar comandos diretos no Termux
+app.post('/executar', (req, res) => {
+  const { comando } = req.body;
+
+  if (!comando) {
+    return res.status(400).send('❌ Comando ausente.');
+  }
+
+  executarShell(comando);
+  res.send(`🧠 Comando recebido: ${comando}`);
 });
 
 app.listen(port, () => {

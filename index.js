@@ -25,6 +25,11 @@ app.post('/sensor', (req, res) => {
   dadosSensores.push(leitura);
 
   console.log(`✅ Sensor ${tipo} recebeu o valor ${valor} às ${leitura.horario}`);
+
+  // Enviar notificação no Termux (no G22)
+  const { exec } = require('child_process');
+  exec(`termux-notification --title "Comando recebido" --content "Sensor: ${tipo} | Valor: ${valor}"`);
+
   res.send(`Leitura de ${tipo} registrada com sucesso.`);
 });
 

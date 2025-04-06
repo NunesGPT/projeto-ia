@@ -59,7 +59,7 @@ app.post('/executar', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`🚀 Servidor rodando em http://localhost:${port}`);
+  console.log(`🚀 Servidor rodando na porta ${port}`);
   gravarAudioStream(); // 🔊 Inicia captação contínua ao iniciar o sistema
 });
 

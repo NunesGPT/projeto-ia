@@ -1,3 +1,4 @@
+const falar = require('./gatilhos/falar');
 const express = require('express');
 const app = express();
 app.use(express.static('public'));
@@ -30,6 +31,7 @@ app.post('/sensor', (req, res) => {
 
   // ✅ Gatilho modular de notificação (executado no Termux)
   notificar(tipo, valor);
+  falar(`Sensor ${tipo} recebeu o valor ${valor}`);
 
   res.send(`Leitura de ${tipo} registrada com sucesso.`);
 });

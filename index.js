@@ -1,81 +1,40 @@
-const pesquisarWeb = require('./gatilhos/pesquisarWeb');
-const gravarAudioStream = require('./gatilhos/gravarAudioStream');
-const gravarVideo = require('./gatilhos/gravarVideo');
-const executarShell = require('./gatilhos/executarShell');
-const falar = require('./gatilhos/falar');
 const express = require('express');
+const fs = require('fs');
 const app = express();
-app.use(express.static('public'));
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
-const notificar = require('./gatilhos/notificar'); // ✅ Importa o gatilho
+// Rotas anteriores podem permanecer aqui...
 
-// Memória simples para armazenar os dados recebidos
-let dadosSensores = [];
+// 🔄 Armazenamento temporário da pergunta e resposta
+let perguntaRecebida = "";
+let respostaDaNeura = "";
 
-// Rota geral para qualquer tipo de sensor
-app.post('/sensor', (req, res) => {
-  const { tipo, valor } = req.body;
-
-  if (!tipo || valor === undefined) {
-    return res.status(400).send('❌ Requisição inválida: precisa ter "tipo" e "valor".');
-  }
-
-  const leitura = {
-    tipo,
-    valor,
-    horario: new Date().toISOString()
-  };
-
-  dadosSensores.push(leitura);
-
-  console.log(`✅ Sensor ${tipo} recebeu o valor ${valor} às ${leitura.horario}`);
-
-  // ✅ Gatilho modular de notificação (executado no Termux)
-  notificar(tipo, valor);
-  falar(`Sensor ${tipo} recebeu o valor ${valor}`);
-  gravarVideo(15); // grava 15 segundos
-
-  res.send(`Leitura de ${tipo} registrada com sucesso.`);
+// 🧠 Rota para a Neura local enviar uma pergunta para a Neura online
+app.post('/neura/pergunta', (req, res) => {
+  perguntaRecebida = req.body.pergunta || "";
+  console.log(`[Pergunta recebida da Neura local]: ${perguntaRecebida}`);
+  res.json({ status: "pergunta recebida" });
 });
 
-// Rota para visualizar os dados armazenados
-app.get('/sensores', (req, res) => {
-  res.json(dadosSensores);
+// 🧠 Rota para a Neura online buscar a pergunta
+app.get('/neura/pergunta', (req, res) => {
+  res.json({ pergunta: perguntaRecebida });
 });
 
-// Rota para executar comandos diretos no Termux
-app.post('/executar', (req, res) => {
-  const { comando } = req.body;
+// 🔁 Rota para a Neura online enviar a resposta
+app.post('/neura/resposta', (req, res) => {
+  respostaDaNeura = req.body.resposta || "";
+  console.log(`[Resposta enviada para Neura local]: ${respostaDaNeura}`);
+  res.json({ status: "resposta recebida" });
+});
 
-  if (!comando) {
-    return res.status(400).send('❌ Comando ausente.');
-  }
-
-  executarShell(comando);
-  res.send(`🧠 Comando recebido: ${comando}`);
+// 🧠 Rota para a Neura local buscar a resposta
+app.get('/neura/resposta', (req, res) => {
+  res.json({ resposta: respostaDaNeura });
 });
 
 app.listen(port, () => {
-  console.log(`🚀 Servidor rodando na porta ${port}`);
-  gravarAudioStream(); // 🔊 Inicia captação contínua ao iniciar o sistema
-});
-
-// Rota para pesquisar na web
-app.post('/pesquisar', async (req, res) => {
-  const { consulta } = req.body;
-
-  if (!consulta) {
-    return res.status(400).send('❌ Consulta ausente.');
-  }
-
-  const resultados = await pesquisarWeb(consulta);
-
-  if (!resultados) {
-    return res.status(500).send('❌ Erro ao pesquisar.');
-  }
-
-  res.json(resultados);
+  console.log(`[Servidor Render] Neura unificada rodando na porta ${port}`);
 });

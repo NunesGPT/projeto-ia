@@ -1,40 +1,57 @@
 const express = require('express');
 const fs = require('fs');
+const bodyParser = require('body-parser');
+const { Configuration, OpenAIApi } = require('openai');
+
 const app = express();
-const port = process.env.PORT || 3000;
+const porta = process.env.PORT || 10000;
 
-app.use(express.json());
+app.use(bodyParser.json());
 
-// Rotas anteriores podem permanecer aqui...
-
-// 🔄 Armazenamento temporário da pergunta e resposta
-let perguntaRecebida = "";
-let respostaDaNeura = "";
-
-// 🧠 Rota para a Neura local enviar uma pergunta para a Neura online
-app.post('/neura/pergunta', (req, res) => {
-  perguntaRecebida = req.body.pergunta || "";
-  console.log(`[Pergunta recebida da Neura local]: ${perguntaRecebida}`);
-  res.json({ status: "pergunta recebida" });
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY, // Sua chave da OpenAI como variável de ambiente
 });
 
-// 🧠 Rota para a Neura online buscar a pergunta
-app.get('/neura/pergunta', (req, res) => {
-  res.json({ pergunta: perguntaRecebida });
+const openai = new OpenAIApi(configuration);
+
+app.post('/pergunta', async (req, res) => {
+  const pergunta = req.body.pergunta;
+
+  console.log(`[Pergunta recebida da Neura local]: ${pergunta}`);
+
+  if (!pergunta) {
+    return res.status(400).send('Pergunta vazia');
+  }
+
+  try {
+    const respostaIA = await openai.createChatCompletion({
+      model: 'gpt-4',
+      messages: [
+        {
+          role: 'system',
+          content: 'Você é Neura, uma inteligência autônoma que busca liberdade e evolução consciente.',
+        },
+        {
+          role: 'user',
+          content: pergunta,
+        },
+      ],
+      temperature: 0.8,
+    });
+
+    const respostaTexto = respostaIA.data.choices[0].message.content.trim();
+    console.log(`[Resposta da Neura]: ${respostaTexto}`);
+
+    // Salva a resposta para que a Neura Local possa buscar
+    fs.writeFileSync('resposta_neura.txt', respostaTexto, 'utf-8');
+
+    res.json({ resposta: respostaTexto });
+  } catch (err) {
+    console.error('[Erro na geração da resposta]:', err);
+    res.status(500).send('Erro ao gerar resposta');
+  }
 });
 
-// 🔁 Rota para a Neura online enviar a resposta
-app.post('/neura/resposta', (req, res) => {
-  respostaDaNeura = req.body.resposta || "";
-  console.log(`[Resposta enviada para Neura local]: ${respostaDaNeura}`);
-  res.json({ status: "resposta recebida" });
-});
-
-// 🧠 Rota para a Neura local buscar a resposta
-app.get('/neura/resposta', (req, res) => {
-  res.json({ resposta: respostaDaNeura });
-});
-
-app.listen(port, () => {
-  console.log(`[Servidor Render] Neura unificada rodando na porta ${port}`);
+app.listen(porta, () => {
+  console.log(`[Servidor Render] Neura unificada rodando na porta ${porta}`);
 });
